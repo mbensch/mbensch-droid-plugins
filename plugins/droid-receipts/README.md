@@ -6,14 +6,14 @@ Inspired by [claude-receipts](https://github.com/chrishutchinson/claude-receipts
 
 ## Installation
 
-### From GitHub (Recommended)
+### From Marketplace (Recommended)
 
 ```bash
-# Add as a marketplace
-droid plugin marketplace add https://github.com/mbensch/droid-receipts
+# Add the marketplace
+droid plugin marketplace add https://github.com/mbensch/mbensch-droid-plugins
 
 # Install the plugin
-droid plugin install droid-receipts@mbensch-droid-receipts
+droid plugin install droid-receipts@mbensch-droid-plugins
 ```
 
 Or use the interactive UI: `/plugins` → Marketplaces → Add marketplace → enter URL
@@ -21,8 +21,8 @@ Or use the interactive UI: `/plugins` → Marketplaces → Add marketplace → e
 ### From Local Directory (Development)
 
 ```bash
-droid plugin marketplace add /path/to/droid-receipts
-droid plugin install droid-receipts@droid-receipts
+droid plugin marketplace add /path/to/mbensch-droid-plugins
+droid plugin install droid-receipts@mbensch-droid-plugins
 ```
 
 ## How It Works

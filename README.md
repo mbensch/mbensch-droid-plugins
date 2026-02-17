@@ -11,13 +11,13 @@ This is my personal marketplace for distributing Droid plugins I've created. Bui
 Add this marketplace to Factory:
 
 ```bash
-droid plugin marketplace add https://github.com/mbensch/droid-plugins
+droid plugin marketplace add https://github.com/mbensch/mbensch-droid-plugins
 ```
 
 Then install plugins:
 
 ```bash
-droid plugin install droid-receipts@droid-plugins
+droid plugin install droid-receipts@mbensch-droid-plugins
 ```
 
 Or browse available plugins via the UI:

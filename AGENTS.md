@@ -1,6 +1,6 @@
 # Droid Marketplace - Agent Guide
 
-This guide explains how to use Droid to work with the droid-plugins marketplace repository.
+This guide explains how to use Droid to work with the `mbensch-droid-plugins` marketplace repository.
 
 ## Working with This Repository
 
@@ -33,7 +33,7 @@ Droid can help you with:
 ## Repository Structure
 
 ```
-droid-plugins/
+mbensch-droid-plugins/
 ├── .factory-plugin/
 │   └── marketplace.json    # Marketplace manifest
 ├── plugins/
@@ -97,7 +97,7 @@ Locally test plugin before pushing:
 droid plugin marketplace add /path/to/this/repo
 
 # Install plugin
-droid plugin install your-plugin@droid-plugins
+droid plugin install your-plugin@mbensch-droid-plugins
 
 # Test functionality
 # Verify hooks fire
