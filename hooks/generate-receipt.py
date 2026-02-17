@@ -21,25 +21,63 @@ PRICE_PER_MILLION = 1.0
 # Cache tokens are billed at 1/10 of standard tokens
 CACHE_PRICE_MULTIPLIER = 0.1
 
+# Model multipliers from Factory pricing docs
+MODEL_MULTIPLIERS = {
+    "minimax-m2.5": 0.12,
+    "glm-4.7": 0.25,
+    "kimi-k2.5": 0.25,
+    "claude-haiku-4-5-20251001": 0.4,
+    "gpt-5.1": 0.5,
+    "gpt-5.1-codex": 0.5,
+    "gpt-5.1-codex-max": 0.5,
+    "gpt-5.2": 0.7,
+    "gpt-5.2-codex": 0.7,
+    "gpt-5.3-codex": 0.7,
+    "claude-sonnet-4-5-20250929": 1.2,
+    "claude-opus-4-5-20251101": 2,
+    "claude-opus-4-6": 2,
+    "claude-opus-4-6-fast": 6,
+    # Fallback for GLM-5 (using GLM-4.7's multiplier as default)
+    "glm-5": 0.25,
+}
+
+
+def get_model_id(token_id: str) -> str:
+    """Extract model ID from token ID."""
+    return token_id.split(":")[-1]
+
+
+def get_model_multiplier(model: str) -> float:
+    """Get Factory pricing multiplier for a model."""
+    model_id = get_model_id(model)
+    return MODEL_MULTIPLIERS.get(model_id, 1.0)
+
+
 # Output directory for receipts
 RECEIPTS_DIR = Path.home() / ".factory" / "receipts"
 
 
-def format_currency(tokens: int) -> str:
-    """Calculate cost at $1/M tokens."""
-    cost = tokens / 1_000_000 * PRICE_PER_MILLION
-    return f"${cost:.2f}"
+def format_currency(amount: float) -> str:
+    """Format a dollar amount."""
+    return f"${amount:.2f}"
 
 
-def format_cache_currency(tokens: int) -> str:
-    """Calculate cache token cost at 1/10 price."""
-    cost = tokens / 1_000_000 * PRICE_PER_MILLION * CACHE_PRICE_MULTIPLIER
-    return f"${cost:.2f}"
+def format_tokens(tokens: float) -> str:
+    """Format token count with K/M suffix."""
+    if tokens >= 1_000_000:
+        return f"{tokens/1_000_000:.1f}M"
+    elif tokens >= 1_000:
+        return f"{tokens/1_000:.1f}K"
+    return f"{tokens:.0f}"
 
 
-def format_number(n: int) -> str:
-    """Format number with thousand separators."""
-    return f"{n:,}"
+def format_tokens(n: int) -> str:
+    """Format a dollar amount based on Factory model-specific pricing."""
+    if n >= 1_000_000:
+        return f"{n/1_000_000:.1f}M"
+    elif n >= 1_000:
+        return f"{n/1_000:.1f}K"
+    return f"{n:.0f}"
 
 
 def format_duration(ms: int) -> str:
@@ -142,15 +180,29 @@ def generate_html(session_data: dict) -> str:
     cache_write = tokens.get("cacheCreationTokens", 0)
     cache_read = tokens.get("cacheReadTokens", 0)
     
-    # Total tokens for display (sum of all)
-    total_tokens = input_tokens + output_tokens + cache_write + cache_read
+    # Raw total tokens
+    total_raw_tokens = input_tokens + output_tokens + cache_write + cache_read
     
-    # Total cost: regular tokens at $1/M, cache tokens at $0.10/M
-    total_cost = (
-        (input_tokens + output_tokens) / 1_000_000 * PRICE_PER_MILLION +
-        (cache_write + cache_read) / 1_000_000 * PRICE_PER_MILLION * CACHE_PRICE_MULTIPLIER
-    )
-    total_cost_str = f"${total_cost:.2f}"
+    # Factory Token Usage: apply model multiplier to input/output/cache creation,
+# and model multiplier × 0.1 discount to cache read
+    model_multiplier = get_model_multiplier(model)
+    input_factory = input_tokens * model_multiplier
+    output_factory = output_tokens * model_multiplier
+    cache_write_factory = cache_write * model_multiplier
+    cache_read_factory = cache_read * model_multiplier * CACHE_PRICE_MULTIPLIER
+
+    factory_tokens = input_factory + output_factory + cache_write_factory + cache_read_factory
+
+    # Total cost: Factory Standard Tokens at $1/M from Factory pricing
+    # (The model multiplier is already applied in factory_tokens)
+    total_cost = factory_tokens / 1_000_000 * PRICE_PER_MILLION
+    total_cost_str = format_currency(total_cost)
+    
+    # Individual token costs based on Factory pricing
+    input_cost = input_factory / 1_000_000 * PRICE_PER_MILLION
+    output_cost = output_factory / 1_000_000 * PRICE_PER_MILLION
+    cache_write_cost = cache_write_factory / 1_000_000 * PRICE_PER_MILLION
+    cache_read_cost = cache_read_factory / 1_000_000 * PRICE_PER_MILLION
     
     # Format date
     try:
@@ -409,29 +461,29 @@ def generate_html(session_data: dict) -> str:
     <div class="item">
       <div class="item-row">
         <span class="item-label">Input tokens</span>
-        <span class="qty">{format_number(input_tokens)}</span>
-        <span class="price">{format_currency(input_tokens)}</span>
+        <span class="qty">{format_tokens(input_factory)}</span>
+        <span class="price">{format_currency(input_cost)}</span>
       </div>
       <div class="item-row">
         <span class="item-label">Output tokens</span>
-        <span class="qty">{format_number(output_tokens)}</span>
-        <span class="price">{format_currency(output_tokens)}</span>
+        <span class="qty">{format_tokens(output_factory)}</span>
+        <span class="price">{format_currency(output_cost)}</span>
       </div>'''
     
     if cache_write > 0:
         html += f'''
       <div class="item-row">
         <span class="item-label">Cache write</span>
-        <span class="qty">{format_number(cache_write)}</span>
-        <span class="price">{format_cache_currency(cache_write)}</span>
+        <span class="qty">{format_tokens(cache_write_factory)}</span>
+        <span class="price">{format_currency(cache_write_cost)}</span>
       </div>'''
     
     if cache_read > 0:
         html += f'''
       <div class="item-row">
         <span class="item-label">Cache read</span>
-        <span class="qty">{format_number(cache_read)}</span>
-        <span class="price">{format_cache_currency(cache_read)}</span>
+        <span class="qty">{format_tokens(cache_read_factory)}</span>
+        <span class="price">{format_currency(cache_read_cost)}</span>
       </div>'''
     
     html += f'''
@@ -484,18 +536,23 @@ def generate_svg(session_data: dict) -> str:
     output_tokens = tokens.get("outputTokens", 0)
     cache_write = tokens.get("cacheCreationTokens", 0)
     cache_read = tokens.get("cacheReadTokens", 0)
-    total_tokens = input_tokens + output_tokens + cache_write + cache_read
     
-    # Costs: regular tokens at $1/M, cache tokens at $0.10/M
-    input_cost = format_currency(input_tokens)
-    output_cost = format_currency(output_tokens)
-    cache_write_cost = format_cache_currency(cache_write)
-    cache_read_cost = format_cache_currency(cache_read)
-    total_cost_val = (
-        (input_tokens + output_tokens) / 1_000_000 * PRICE_PER_MILLION +
-        (cache_write + cache_read) / 1_000_000 * PRICE_PER_MILLION * CACHE_PRICE_MULTIPLIER
-    )
-    total_cost = f"${total_cost_val:.2f}"
+    # Factory Token Usage: apply model multiplier to input/output/cache creation,
+    # and model multiplier × 0.1 discount to cache read
+    model_multiplier = get_model_multiplier(model)
+    input_factory = input_tokens * model_multiplier
+    output_factory = output_tokens * model_multiplier
+    cache_write_factory = cache_write * model_multiplier
+    cache_read_factory = cache_read * model_multiplier * CACHE_PRICE_MULTIPLIER
+
+    factory_tokens = input_factory + output_factory + cache_write_factory + cache_read_factory
+
+    # Individual token costs based on Factory pricing
+    input_cost = input_factory / 1_000_000 * PRICE_PER_MILLION
+    output_cost = output_factory / 1_000_000 * PRICE_PER_MILLION
+    cache_write_cost = cache_write_factory / 1_000_000 * PRICE_PER_MILLION
+    cache_read_cost = cache_read_factory / 1_000_000 * PRICE_PER_MILLION
+    total_cost_val = (input_cost + output_cost + cache_write_cost + cache_read_cost)
     
     # Format date
     try:
@@ -573,12 +630,12 @@ def generate_svg(session_data: dict) -> str:
   
   <!-- Line items -->
   <text x="45" y="290" class="text">Input tokens</text>
-  <text x="200" y="290" class="text" text-anchor="middle">{format_number(input_tokens)}</text>
-  <text x="370" y="290" class="text" text-anchor="end">{input_cost}</text>
+  <text x="200" y="290" class="text" text-anchor="middle">{format_tokens(input_factory)}</text>
+  <text x="370" y="290" class="text" text-anchor="end">{format_currency(input_cost)}</text>
   
   <text x="45" y="310" class="text">Output tokens</text>
-  <text x="200" y="310" class="text" text-anchor="middle">{format_number(output_tokens)}</text>
-  <text x="370" y="310" class="text" text-anchor="end">{output_cost}</text>'''
+  <text x="200" y="310" class="text" text-anchor="middle">{format_tokens(output_factory)}</text>
+  <text x="370" y="310" class="text" text-anchor="end">{format_currency(output_cost)}</text>'''
     
     # Add cache tokens if present
     y_offset = 330
