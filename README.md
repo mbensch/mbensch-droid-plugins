@@ -1,94 +1,103 @@
 # Droid Receipts
 
-A Factory plugin that generates visual receipts (SVG) for Droid sessions when they end.
+A Factory plugin that generates visual receipts (HTML/SVG) for Droid sessions when they end.
 
 Inspired by [claude-receipts](https://github.com/chrishutchinson/claude-receipts).
 
 ## Installation
 
-### From Local Directory
+### From GitHub (Recommended)
 
 ```bash
-# Enable the plugin in your settings
-droid plugins add /path/to/droid-receipts/.factory/plugins/droid-receipts
+# Add as a marketplace
+droid plugin marketplace add https://github.com/mbensch/droid-receipts
+
+# Install the plugin
+droid plugin install droid-receipts@mbensch-droid-receipts
 ```
 
-Or manually add to `~/.factory/settings.json`:
+Or use the interactive UI: `/plugins` → Marketplaces → Add marketplace → enter URL
 
-```json
-{
-  "enabledPlugins": {
-    "droid-receipts@local": true
-  }
-}
+### From Local Directory (Development)
+
+```bash
+droid plugin marketplace add /path/to/droid-receipts
+droid plugin install droid-receipts@droid-receipts
 ```
 
 ## How It Works
 
 1. **SessionEnd Hook**: When a Droid session ends, the plugin is triggered
 2. **Data Collection**: Reads session settings and transcript for token counts, model info, and timestamps
-3. **Receipt Generation**: Creates an SVG receipt with thermal printer styling
-4. **Output**: Saves to `~/.factory/receipts/{session-id}.svg` and opens in browser (macOS)
+3. **Receipt Generation**: Creates an HTML receipt with modern styling
+4. **Output**: Saves to `~/.factory/receipts/{session-id}.html` and opens in browser (macOS)
 
 ## Receipt Contents
 
-- Factory logo
-- Session title
+- Factory branding
+- Model badge prominently displayed
+- Session ID
 - Project location
 - Date/time
 - Duration
-- Model used
 - Token breakdown:
   - Input tokens
   - Output tokens
   - Cache write tokens
   - Cache read tokens
-- Estimated cost ($1 per 1M tokens)
+- Total cost ($1 per 1M tokens)
+- Star Wars-style droid cashier name (e.g., "R2-A3F", "GNK-7B2")
 
 ## Configuration
 
-Optional config file at `~/.factory/droid-receipts.json`:
-
-```json
-{
-  "output_dir": "~/.factory/receipts",
-  "auto_open": true
-}
-```
+Set output format via environment variable `DROID_RECEIPT_FORMAT`:
+- `html` (default) - Generate HTML receipt
+- `svg` - Generate SVG receipt
+- `both` - Generate both formats
 
 ## Example Output
 
 ```
 ================================
-       [FACTORY LOGO]
          FACTORY
       DROID RECEIPT
 ================================
+[ Droid Core (GLM-5) ]
 
 Location....................my-project
-Session.....................Fix auth bug
+Session.....................abc12345
 Date........................2026-02-16 22:31:45
 Duration....................2m 15s
 
 ================================
 ITEM                    QTY    PRICE
 ----------------------------------------
-Claude Opus 4.6
-  Input tokens        113,575      $0.11
-  Output tokens         2,287      $0.00
-  Cache write          96,562      $0.10
-  Cache read          578,832      $0.58
+Input tokens          113,575      $0.11
+Output tokens           2,287      $0.00
+Cache write            96,562      $0.10
+Cache read            578,832      $0.58
 ----------------------------------------
-TOTAL                               $0.12
+TOTAL                           $0.79
 ================================
 
-CASHIER: Claude Opus 4.6
+SERVED BY: R2-A3F
 
 Thank you for building!
 
-----------------------------------------
-github.com/Factory-AI/factory
+factory.ai
 ================================
+```
+
+## Plugin Structure
+
+```
+droid-receipts/
+├── .factory-plugin/
+│   └── plugin.json       # Plugin manifest
+├── hooks/
+│   ├── hooks.json        # Hook configuration
+│   └── generate-receipt.py
+└── README.md
 ```
 
 ## License

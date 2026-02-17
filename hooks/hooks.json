@@ -1,0 +1,13 @@
+{
+  "SessionEnd": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "${DROID_PLUGIN_ROOT}/hooks/generate-receipt.py",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
+}
