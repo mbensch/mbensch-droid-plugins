@@ -87,7 +87,8 @@ def generate_svg(session_data: dict) -> str:
     
     # Extract data
     session_id = session_data["session_id"]
-    session_title = session_data.get("title", "Droid Session")[:40]
+    # Use short session ID (first 8 chars)
+    session_short = session_id[:8] if len(session_id) >= 8 else session_id
     location = session_data.get("location", "The Cloud")[:30]
     model = session_data["model"]
     model_name = get_model_name(model)
@@ -95,12 +96,12 @@ def generate_svg(session_data: dict) -> str:
     end_time = session_data.get("end_time", datetime.now().isoformat())
     active_time = session_data.get("active_time_ms", 0)
     
-    # Calculate totals
+    # Calculate totals - sum ALL tokens for total cost
     input_tokens = tokens.get("inputTokens", 0)
     output_tokens = tokens.get("outputTokens", 0)
     cache_write = tokens.get("cacheCreationTokens", 0)
     cache_read = tokens.get("cacheReadTokens", 0)
-    total_tokens = input_tokens + output_tokens
+    total_tokens = input_tokens + output_tokens + cache_write + cache_read
     
     input_cost = format_currency(input_tokens)
     output_cost = format_currency(output_tokens)
@@ -119,101 +120,91 @@ def generate_svg(session_data: dict) -> str:
     duration_str = format_duration(active_time)
     
     # Escape text for XML
-    session_title = escape_xml(session_title)
     location = escape_xml(location)
     model_name = escape_xml(model_name)
-    
-    # Factory logo (simplified SVG path)
-    logo_path = '''M500.76 329.29C499.9 329.077 499.097 328.68 498.404 328.128C497.712 327.575 497.146 326.88 496.748 326.089C496.349 325.298 496.126 324.43 496.093 323.545C496.061 322.659 496.22 321.778 496.56 320.96C508.3 292.39 513.48 269.53 505.12 259.96C482.98 234.57 394.19 285.059 365.88 302.159C365.122 302.615 364.274 302.902 363.395 303C362.516 303.098 361.626 303.005 360.786 302.728C359.946 302.451 359.175 301.996 358.527 301.394C357.879 300.792 357.369 300.057 357.03 299.24C345.13 270.73 332.62 250.9 319.94 250.04C286.33 247.74 259.24 346.229 251.31 378.329C251.098 379.189 250.703 379.993 250.152 380.685C249.6 381.378 248.905 381.943 248.115 382.342C247.325 382.741 246.458 382.964 245.573 382.996C244.689 383.029 243.808 382.87 242.99 382.53C214.42 370.79 191.55 365.61 181.99 373.97C156.6 396.11 207.08 484.9 224.18 513.21C224.637 513.967 224.925 514.815 225.024 515.695C225.123 516.574 225.031 517.465 224.754 518.305C224.477 519.146 224.021 519.917 223.418 520.565C222.815 521.213 222.079 521.722 221.26 522.059C192.76 533.959 172.93 546.469 172.06 559.149C169.77 592.759 268.25 619.85 300.36 627.78C301.218 627.994 302.019 628.391 302.71 628.943C303.4 629.495 303.964 630.19 304.361 630.98C304.759 631.769 304.982 632.635 305.014 633.519C305.047 634.402 304.889 635.283 304.55 636.099C292.81 664.669 287.63 687.539 295.99 697.099C318.13 722.489 406.93 672.009 435.24 654.909'''
+    session_short = escape_xml(session_short)
     
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg width="400" height="680" viewBox="0 0 400 680" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="550" viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
       .receipt-bg {{ fill: #f8f8f8; }}
       .text {{ font-family: 'Courier New', Courier, monospace; font-size: 12px; fill: #333; }}
       .text-bold {{ font-family: 'Courier New', Courier, monospace; font-size: 12px; fill: #333; font-weight: bold; }}
-      .text-large {{ font-family: 'Courier New', Courier, monospace; font-size: 14px; fill: #333; }}
+      .text-large {{ font-family: 'Courier New', Courier, monospace; font-size: 16px; fill: #333; font-weight: bold; }}
       .text-small {{ font-family: 'Courier New', Courier, monospace; font-size: 10px; fill: #666; }}
+      .text-tiny {{ font-family: 'Courier New', Courier, monospace; font-size: 9px; fill: #999; }}
       .separator {{ stroke: #333; stroke-width: 2; }}
-      .light-separator {{ stroke: #999; stroke-width: 1; stroke-dasharray: 2,2; }}
-      .logo {{ fill: #333; }}
+      .light-separator {{ stroke: #ccc; stroke-width: 1; stroke-dasharray: 2,2; }}
+      .logo-text {{ font-family: Arial, sans-serif; font-size: 24px; fill: #333; font-weight: bold; }}
     </style>
   </defs>
   
   <!-- Receipt background -->
-  <rect class="receipt-bg" x="10" y="10" width="380" height="660" rx="3"/>
-  
-  <!-- Top zigzag edge -->
-  <path d="M10 25 L30 10 L50 25 L70 10 L90 25 L110 10 L130 25 L150 10 L170 25 L190 10 L210 25 L230 10 L250 25 L270 10 L290 25 L310 10 L330 25 L350 10 L370 25 L390 10" fill="#3a3a3a"/>
-  
-  <!-- Factory Logo -->
-  <g transform="translate(130, 50) scale(0.12)">
-    <path class="logo" d="{logo_path}"/>
-  </g>
-  
-  <!-- DROID text -->
-  <text x="200" y="145" class="text-large text-bold" text-anchor="middle" font-size="18">FACTORY</text>
-  <text x="200" y="165" class="text-small" text-anchor="middle">DROID RECEIPT</text>
-  
-  <!-- Separator -->
-  <line x1="30" y1="185" x2="370" y2="185" class="separator"/>
-  
-  <!-- Session info -->
-  <text x="30" y="210" class="text">Location</text>
-  <text x="370" y="210" class="text" text-anchor="end">{location}</text>
-  <line x1="100" y1="206" x2="290" y2="206" class="light-separator"/>
-  
-  <text x="30" y="230" class="text">Session</text>
-  <text x="370" y="230" class="text" text-anchor="end">{session_title}</text>
-  <line x1="100" y1="226" x2="290" y2="226" class="light-separator"/>
-  
-  <text x="30" y="250" class="text">Date</text>
-  <text x="370" y="250" class="text" text-anchor="end">{date_str}</text>
-  <line x1="100" y1="246" x2="290" y2="246" class="light-separator"/>
-  
-  <text x="30" y="270" class="text">Duration</text>
-  <text x="370" y="270" class="text" text-anchor="end">{duration_str}</text>
-  <line x1="100" y1="266" x2="290" y2="266" class="light-separator"/>
-  
-  <!-- Separator -->
-  <line x1="30" y1="290" x2="370" y2="290" class="separator"/>
+  <rect class="receipt-bg" x="10" y="10" width="380" height="530" rx="4"/>
   
   <!-- Header -->
-  <text x="30" y="315" class="text-bold">ITEM</text>
-  <text x="200" y="315" class="text-bold" text-anchor="middle">QTY</text>
-  <text x="370" y="315" class="text-bold" text-anchor="end">PRICE</text>
+  <text x="200" y="55" class="logo-text" text-anchor="middle">FACTORY</text>
+  <text x="200" y="78" class="text-small" text-anchor="middle">DROID RECEIPT</text>
   
-  <line x1="30" y1="325" x2="370" y2="325" class="light-separator"/>
+  <!-- Separator -->
+  <line x1="30" y1="95" x2="370" y2="95" class="separator"/>
+  
+  <!-- Session info -->
+  <text x="30" y="120" class="text">Location</text>
+  <text x="370" y="120" class="text" text-anchor="end">{location}</text>
+  <line x1="105" y1="116" x2="285" y2="116" class="light-separator"/>
+  
+  <text x="30" y="140" class="text">Session</text>
+  <text x="370" y="140" class="text" text-anchor="end">{session_short}</text>
+  <line x1="105" y1="136" x2="285" y2="136" class="light-separator"/>
+  
+  <text x="30" y="160" class="text">Date</text>
+  <text x="370" y="160" class="text" text-anchor="end">{date_str}</text>
+  <line x1="105" y1="156" x2="285" y2="156" class="light-separator"/>
+  
+  <text x="30" y="180" class="text">Duration</text>
+  <text x="370" y="180" class="text" text-anchor="end">{duration_str}</text>
+  <line x1="105" y1="176" x2="285" y2="176" class="light-separator"/>
+  
+  <!-- Separator -->
+  <line x1="30" y1="200" x2="370" y2="200" class="separator"/>
+  
+  <!-- Header -->
+  <text x="30" y="225" class="text-bold">ITEM</text>
+  <text x="200" y="225" class="text-bold" text-anchor="middle">QTY</text>
+  <text x="370" y="225" class="text-bold" text-anchor="end">PRICE</text>
+  
+  <line x1="30" y1="235" x2="370" y2="235" class="light-separator"/>
   
   <!-- Model name -->
-  <text x="30" y="350" class="text-bold">{model_name}</text>
+  <text x="30" y="260" class="text-bold">{model_name}</text>
   
   <!-- Line items -->
-  <text x="45" y="375" class="text">Input tokens</text>
-  <text x="200" y="375" class="text" text-anchor="middle">{format_number(input_tokens)}</text>
-  <text x="370" y="375" class="text" text-anchor="end">{input_cost}</text>
+  <text x="45" y="285" class="text">Input tokens</text>
+  <text x="200" y="285" class="text" text-anchor="middle">{format_number(input_tokens)}</text>
+  <text x="370" y="285" class="text" text-anchor="end">{input_cost}</text>
   
-  <text x="45" y="395" class="text">Output tokens</text>
-  <text x="200" y="395" class="text" text-anchor="middle">{format_number(output_tokens)}</text>
-  <text x="370" y="395" class="text" text-anchor="end">{output_cost}</text>'''
+  <text x="45" y="305" class="text">Output tokens</text>
+  <text x="200" y="305" class="text" text-anchor="middle">{format_number(output_tokens)}</text>
+  <text x="370" y="305" class="text" text-anchor="end">{output_cost}</text>'''
     
     # Add cache tokens if present
     if cache_write > 0:
         svg += f'''
-  <text x="45" y="415" class="text">Cache write</text>
-  <text x="200" y="415" class="text" text-anchor="middle">{format_number(cache_write)}</text>
-  <text x="370" y="415" class="text" text-anchor="end">{cache_write_cost}</text>'''
+  <text x="45" y="325" class="text">Cache write</text>
+  <text x="200" y="325" class="text" text-anchor="middle">{format_number(cache_write)}</text>
+  <text x="370" y="325" class="text" text-anchor="end">{cache_write_cost}</text>'''
     
     if cache_read > 0:
-        y_pos = 435 if cache_write > 0 else 415
+        y_pos = 345 if cache_write > 0 else 325
         svg += f'''
   <text x="45" y="{y_pos}" class="text">Cache read</text>
   <text x="200" y="{y_pos}" class="text" text-anchor="middle">{format_number(cache_read)}</text>
   <text x="370" y="{y_pos}" class="text" text-anchor="end">{cache_read_cost}</text>'''
     
     # Calculate total section position
-    total_y = 435
+    total_y = 345
     if cache_write > 0:
         total_y += 20
     if cache_read > 0:
@@ -222,24 +213,21 @@ def generate_svg(session_data: dict) -> str:
     svg += f'''
   
   <!-- Total section -->
-  <line x1="30" y1="{total_y + 10}" x2="370" y2="{total_y + 10}" class="separator"/>
+  <line x1="30" y1="{total_y + 15}" x2="370" y2="{total_y + 15}" class="separator"/>
   
-  <text x="30" y="{total_y + 35}" class="text-bold">TOTAL</text>
-  <text x="370" y="{total_y + 35}" class="text-bold" text-anchor="end">{total_cost}</text>
+  <text x="30" y="{total_y + 40}" class="text-bold" font-size="14">TOTAL</text>
+  <text x="370" y="{total_y + 40}" class="text-bold" font-size="14" text-anchor="end">{total_cost}</text>
   
-  <line x1="30" y1="{total_y + 45}" x2="370" y2="{total_y + 45}" class="separator"/>
+  <line x1="30" y1="{total_y + 55}" x2="370" y2="{total_y + 55}" class="separator"/>
   
   <!-- Footer -->
-  <text x="200" y="{total_y + 75}" class="text" text-anchor="middle">CASHIER: {model_name}</text>
+  <text x="200" y="{total_y + 85}" class="text" text-anchor="middle">CASHIER: {model_name}</text>
   
-  <text x="200" y="{total_y + 105}" class="text" text-anchor="middle">Thank you for building!</text>
+  <text x="200" y="{total_y + 115}" class="text" text-anchor="middle">Thank you for building!</text>
   
-  <line x1="100" y1="{total_y + 125}" x2="300" y2="{total_y + 125}" class="light-separator"/>
+  <line x1="100" y1="{total_y + 135}" x2="300" y2="{total_y + 135}" class="light-separator"/>
   
-  <text x="200" y="{total_y + 145}" class="text-small" text-anchor="middle">github.com/Factory-AI/factory</text>
-  
-  <!-- Bottom zigzag edge -->
-  <path d="M10 665 L30 680 L50 665 L70 680 L90 665 L110 680 L130 665 L150 680 L170 665 L190 680 L210 665 L230 680 L250 665 L270 680 L290 665 L310 680 L330 665 L350 680 L370 665 L390 680" fill="#3a3a3a"/>
+  <text x="200" y="{total_y + 155}" class="text-small" text-anchor="middle">github.com/Factory-AI/factory</text>
 </svg>'''
     
     return svg
@@ -276,20 +264,11 @@ def main():
             print("No token usage data available", file=sys.stderr)
             sys.exit(0)
         
-        # Parse transcript for session title and end time
-        session_title = "Droid Session"
+        # Parse transcript for end time
         end_time = datetime.now().isoformat()
         
         if os.path.exists(transcript_path):
             with open(transcript_path, "r") as f:
-                first_line = f.readline().strip()
-                if first_line:
-                    try:
-                        first_entry = json.loads(first_line)
-                        session_title = first_entry.get("title", session_title)
-                    except:
-                        pass
-                
                 # Get last timestamp
                 for line in reversed(list(f)):
                     line = line.strip()
@@ -305,7 +284,6 @@ def main():
         # Build session data
         session_data = {
             "session_id": session_id,
-            "title": session_title,
             "location": location,
             "model": model,
             "tokens": tokens,
