@@ -72,6 +72,28 @@ def get_model_name(model: str) -> str:
     return model_map.get(model, model)
 
 
+def generate_droid_name(session_id: str) -> str:
+    """Generate a Star Wars-style droid name from session ID."""
+    # Extract hex-like characters from session ID
+    hex_chars = "".join(c for c in session_id.upper() if c in "0123456789ABCDEF")
+    
+    # Pad if needed
+    if len(hex_chars) < 8:
+        hex_chars = hex_chars.ljust(8, "0")
+    
+    # Star Wars droid prefixes
+    prefixes = ["R2", "C3", "BB", "K2", "IG", "BD", "QT", "AP", "RX", "TC", "GNK", "WED"]
+    
+    # Use first hex digit to pick prefix
+    prefix_idx = int(hex_chars[0], 16) % len(prefixes)
+    prefix = prefixes[prefix_idx]
+    
+    # Generate model number from remaining hex
+    model_num = hex_chars[1:4]
+    
+    return f"{prefix}-{model_num}"
+
+
 def escape_xml(text: str) -> str:
     """Escape XML special characters."""
     return (text
@@ -92,6 +114,7 @@ def generate_svg(session_data: dict) -> str:
     location = session_data.get("location", "The Cloud")[:30]
     model = session_data["model"]
     model_name = get_model_name(model)
+    droid_name = generate_droid_name(session_id)
     tokens = session_data["tokens"]
     end_time = session_data.get("end_time", datetime.now().isoformat())
     active_time = session_data.get("active_time_ms", 0)
@@ -122,10 +145,11 @@ def generate_svg(session_data: dict) -> str:
     # Escape text for XML
     location = escape_xml(location)
     model_name = escape_xml(model_name)
+    droid_name = escape_xml(droid_name)
     session_short = escape_xml(session_short)
     
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg width="400" height="550" viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="580" viewBox="0 0 400 580" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
       .receipt-bg {{ fill: #f8f8f8; }}
@@ -137,11 +161,12 @@ def generate_svg(session_data: dict) -> str:
       .separator {{ stroke: #333; stroke-width: 2; }}
       .light-separator {{ stroke: #ccc; stroke-width: 1; stroke-dasharray: 2,2; }}
       .logo-text {{ font-family: Arial, sans-serif; font-size: 24px; fill: #333; font-weight: bold; }}
+      .model-tag {{ fill: #e8e8e8; }}
     </style>
   </defs>
   
   <!-- Receipt background -->
-  <rect class="receipt-bg" x="10" y="10" width="380" height="530" rx="4"/>
+  <rect class="receipt-bg" x="10" y="10" width="380" height="560" rx="4"/>
   
   <!-- Header -->
   <text x="200" y="55" class="logo-text" text-anchor="middle">FACTORY</text>
@@ -150,84 +175,83 @@ def generate_svg(session_data: dict) -> str:
   <!-- Separator -->
   <line x1="30" y1="95" x2="370" y2="95" class="separator"/>
   
+  <!-- Model badge -->
+  <rect class="model-tag" x="100" y="105" width="200" height="22" rx="3"/>
+  <text x="200" y="121" class="text-bold" text-anchor="middle" font-size="11">{model_name}</text>
+  
   <!-- Session info -->
-  <text x="30" y="120" class="text">Location</text>
-  <text x="370" y="120" class="text" text-anchor="end">{location}</text>
-  <line x1="105" y1="116" x2="285" y2="116" class="light-separator"/>
+  <text x="30" y="150" class="text">Location</text>
+  <text x="370" y="150" class="text" text-anchor="end">{location}</text>
+  <line x1="105" y1="146" x2="285" y2="146" class="light-separator"/>
   
-  <text x="30" y="140" class="text">Session</text>
-  <text x="370" y="140" class="text" text-anchor="end">{session_short}</text>
-  <line x1="105" y1="136" x2="285" y2="136" class="light-separator"/>
+  <text x="30" y="170" class="text">Session</text>
+  <text x="370" y="170" class="text" text-anchor="end">{session_short}</text>
+  <line x1="105" y1="166" x2="285" y2="166" class="light-separator"/>
   
-  <text x="30" y="160" class="text">Date</text>
-  <text x="370" y="160" class="text" text-anchor="end">{date_str}</text>
-  <line x1="105" y1="156" x2="285" y2="156" class="light-separator"/>
+  <text x="30" y="190" class="text">Date</text>
+  <text x="370" y="190" class="text" text-anchor="end">{date_str}</text>
+  <line x1="105" y1="186" x2="285" y2="186" class="light-separator"/>
   
-  <text x="30" y="180" class="text">Duration</text>
-  <text x="370" y="180" class="text" text-anchor="end">{duration_str}</text>
-  <line x1="105" y1="176" x2="285" y2="176" class="light-separator"/>
+  <text x="30" y="210" class="text">Duration</text>
+  <text x="370" y="210" class="text" text-anchor="end">{duration_str}</text>
+  <line x1="105" y1="206" x2="285" y2="206" class="light-separator"/>
   
   <!-- Separator -->
-  <line x1="30" y1="200" x2="370" y2="200" class="separator"/>
+  <line x1="30" y1="230" x2="370" y2="230" class="separator"/>
   
   <!-- Header -->
-  <text x="30" y="225" class="text-bold">ITEM</text>
-  <text x="200" y="225" class="text-bold" text-anchor="middle">QTY</text>
-  <text x="370" y="225" class="text-bold" text-anchor="end">PRICE</text>
+  <text x="30" y="255" class="text-bold">ITEM</text>
+  <text x="200" y="255" class="text-bold" text-anchor="middle">QTY</text>
+  <text x="370" y="255" class="text-bold" text-anchor="end">PRICE</text>
   
-  <line x1="30" y1="235" x2="370" y2="235" class="light-separator"/>
-  
-  <!-- Model name -->
-  <text x="30" y="260" class="text-bold">{model_name}</text>
+  <line x1="30" y1="265" x2="370" y2="265" class="light-separator"/>
   
   <!-- Line items -->
-  <text x="45" y="285" class="text">Input tokens</text>
-  <text x="200" y="285" class="text" text-anchor="middle">{format_number(input_tokens)}</text>
-  <text x="370" y="285" class="text" text-anchor="end">{input_cost}</text>
+  <text x="45" y="290" class="text">Input tokens</text>
+  <text x="200" y="290" class="text" text-anchor="middle">{format_number(input_tokens)}</text>
+  <text x="370" y="290" class="text" text-anchor="end">{input_cost}</text>
   
-  <text x="45" y="305" class="text">Output tokens</text>
-  <text x="200" y="305" class="text" text-anchor="middle">{format_number(output_tokens)}</text>
-  <text x="370" y="305" class="text" text-anchor="end">{output_cost}</text>'''
+  <text x="45" y="310" class="text">Output tokens</text>
+  <text x="200" y="310" class="text" text-anchor="middle">{format_number(output_tokens)}</text>
+  <text x="370" y="310" class="text" text-anchor="end">{output_cost}</text>'''
     
     # Add cache tokens if present
+    y_offset = 330
     if cache_write > 0:
         svg += f'''
-  <text x="45" y="325" class="text">Cache write</text>
-  <text x="200" y="325" class="text" text-anchor="middle">{format_number(cache_write)}</text>
-  <text x="370" y="325" class="text" text-anchor="end">{cache_write_cost}</text>'''
+  <text x="45" y="{y_offset}" class="text">Cache write</text>
+  <text x="200" y="{y_offset}" class="text" text-anchor="middle">{format_number(cache_write)}</text>
+  <text x="370" y="{y_offset}" class="text" text-anchor="end">{cache_write_cost}</text>'''
+        y_offset += 20
     
     if cache_read > 0:
-        y_pos = 345 if cache_write > 0 else 325
         svg += f'''
-  <text x="45" y="{y_pos}" class="text">Cache read</text>
-  <text x="200" y="{y_pos}" class="text" text-anchor="middle">{format_number(cache_read)}</text>
-  <text x="370" y="{y_pos}" class="text" text-anchor="end">{cache_read_cost}</text>'''
+  <text x="45" y="{y_offset}" class="text">Cache read</text>
+  <text x="200" y="{y_offset}" class="text" text-anchor="middle">{format_number(cache_read)}</text>
+  <text x="370" y="{y_offset}" class="text" text-anchor="end">{cache_read_cost}</text>'''
+        y_offset += 20
     
-    # Calculate total section position
-    total_y = 345
-    if cache_write > 0:
-        total_y += 20
-    if cache_read > 0:
-        total_y += 20
+    # Total section
+    total_y = y_offset + 15
     
     svg += f'''
   
   <!-- Total section -->
-  <line x1="30" y1="{total_y + 15}" x2="370" y2="{total_y + 15}" class="separator"/>
+  <line x1="30" y1="{total_y}" x2="370" y2="{total_y}" class="separator"/>
   
-  <text x="30" y="{total_y + 40}" class="text-bold" font-size="14">TOTAL</text>
-  <text x="370" y="{total_y + 40}" class="text-bold" font-size="14" text-anchor="end">{total_cost}</text>
+  <text x="30" y="{total_y + 25}" class="text-bold" font-size="14">TOTAL</text>
+  <text x="370" y="{total_y + 25}" class="text-bold" font-size="14" text-anchor="end">{total_cost}</text>
   
-  <line x1="30" y1="{total_y + 55}" x2="370" y2="{total_y + 55}" class="separator"/>
+  <line x1="30" y1="{total_y + 40}" x2="370" y2="{total_y + 40}" class="separator"/>
   
   <!-- Footer -->
-  <text x="200" y="{total_y + 85}" class="text" text-anchor="middle">CASHIER: {model_name}</text>
+  <text x="200" y="{total_y + 70}" class="text" text-anchor="middle">SERVED BY: {droid_name}</text>
   
-  <text x="200" y="{total_y + 115}" class="text" text-anchor="middle">Thank you for building!</text>
+  <text x="200" y="{total_y + 100}" class="text" text-anchor="middle">Thank you for building!</text>
   
-  <line x1="100" y1="{total_y + 135}" x2="300" y2="{total_y + 135}" class="light-separator"/>
+  <line x1="100" y1="{total_y + 120}" x2="300" y2="{total_y + 120}" class="light-separator"/>
   
-  <text x="200" y="{total_y + 155}" class="text-small" text-anchor="middle">github.com/Factory-AI/factory</text>
+  <text x="200" y="{total_y + 140}" class="text-small" text-anchor="middle">github.com/Factory-AI/factory</text>
 </svg>'''
     
     return svg
