@@ -24,9 +24,9 @@
       "category": "developer-tools"
     },
     {
-      "name": "worktrees",
+      "name": "worktrees-skill",
       "description": "A skill for systematic git worktree management with smart directory selection and safety verification",
-      "source": "./plugins/worktrees",
+      "source": "./plugins/worktrees-skill",
       "category": "developer-tools"
     }
   ]

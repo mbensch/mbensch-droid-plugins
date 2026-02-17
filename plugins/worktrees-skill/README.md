@@ -1,4 +1,4 @@
-# Worktrees
+# Worktrees Skill
 
 A Factory plugin that provides a skill for systematic git worktree management with smart directory selection and safety verification.
 
@@ -11,7 +11,7 @@ A Factory plugin that provides a skill for systematic git worktree management wi
 droid plugin marketplace add https://github.com/mbensch/mbensch-droid-plugins
 
 # Install the plugin
-droid plugin install worktrees@mbensch-droid-plugins
+droid plugin install worktrees-skill@mbensch-droid-plugins
 ```
 
 Or use the interactive UI: `/plugins` → Marketplaces → Add marketplace → enter URL
@@ -20,7 +20,7 @@ Or use the interactive UI: `/plugins` → Marketplaces → Add marketplace → e
 
 ```bash
 droid plugin marketplace add /path/to/mbensch-droid-plugins
-droid plugin install worktrees@mbensch-droid-plugins
+droid plugin install worktrees-skill@mbensch-droid-plugins
 ```
 
 ## Skills
@@ -47,7 +47,7 @@ Use the using-worktrees skill to set up an isolated workspace.
 ## Plugin Structure
 
 ```
-worktrees/
+worktrees-skill/
 ├── .factory-plugin/
 │   └── plugin.json
 ├── skills/

@@ -57,7 +57,7 @@ mbensch-droid-plugins/
 │   │   │   ├── worktree.md
 │   │   │   └── clean-worktrees.md
 │   │   └── README.md
-│   └── worktrees/          # Worktree management skill
+│   └── worktrees-skill/     # Worktree management skill
 │       ├── .factory-plugin/
 │       │   └── plugin.json
 │       ├── skills/

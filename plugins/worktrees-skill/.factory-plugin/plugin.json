@@ -1,5 +1,5 @@
 {
-  "name": "worktrees",
+  "name": "worktrees-skill",
   "version": "1.0.0",
   "description": "A skill for systematic git worktree management with smart directory selection and safety verification",
   "author": {
