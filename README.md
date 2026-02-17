@@ -14,12 +14,16 @@ Add this marketplace to Factory:
 droid plugin marketplace add https://github.com/mbensch/mbensch-droid-plugins
 ```
 
-Then install plugins:
+Install plugins:
 
 ```bash
+# Core plugins
 droid plugin install droid-receipts@mbensch-droid-plugins
-droid plugin install auto-worktrees@mbensch-droid-plugins
-droid plugin install manual-worktrees@mbensch-droid-plugins
+
+# Choose ONE worktree approach (see Author's Notes below)
+droid plugin install manual-worktrees@mbensch-droid-plugins  # or auto-worktrees
+
+# Optional: enhances worktree handling
 droid plugin install worktrees-skill@mbensch-droid-plugins
 ```
 
@@ -74,6 +78,30 @@ A skill for systematic git worktree management with smart directory selection an
 - Safety verification to ensure directories are gitignored
 - Auto-detection of project setup commands (npm, cargo, pip, go mod)
 - Baseline test verification before starting work
+
+## Author's Notes
+
+### Choosing a Worktree Plugin
+
+**Do not install both `auto-worktrees` and `manual-worktrees`.** They serve the same purpose with different approaches - pick one based on your workflow:
+
+- **auto-worktrees** - Best if you want every Droid session to automatically get its own isolated worktree. Great for "set it and forget it" workflows where you always want session isolation.
+
+- **manual-worktrees** - Best if you prefer control over when worktrees are created. Use `/worktree` when you need isolation and `/clean-worktrees` when you're done. Start here if you're unsure.
+
+### Recommended Setup
+
+```bash
+# Option A: Automatic worktrees + skill
+droid plugin install auto-worktrees@mbensch-droid-plugins
+droid plugin install worktrees-skill@mbensch-droid-plugins
+
+# Option B: Manual worktrees + skill (recommended if unsure)
+droid plugin install manual-worktrees@mbensch-droid-plugins
+droid plugin install worktrees-skill@mbensch-droid-plugins
+```
+
+The `worktrees-skill` plugin complements either choice by giving Droid a deeper understanding of worktree best practices for complex implementation tasks.
 
 ## Adding New Plugins
 
