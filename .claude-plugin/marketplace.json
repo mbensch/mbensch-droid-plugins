@@ -6,20 +6,8 @@
   },
   "plugins": [
     {
-      "name": "droid-receipts",
-      "description": "Generate visual receipts for Droid sessions with token breakdown and cost estimation",
-      "source": "./plugins/droid-receipts",
-      "category": "productivity"
-    },
-    {
-      "name": "auto-worktrees",
-      "description": "Automatically create and manage git worktrees for Droid sessions, isolating each session on its own branch",
-      "source": "./plugins/auto-worktrees",
-      "category": "developer-tools"
-    },
-    {
       "name": "manual-worktrees",
-      "description": "On-demand git worktree creation and cleanup via /worktree and /clean-worktrees commands",
+      "description": "On-demand git worktree creation via /worktree command",
       "source": "./plugins/manual-worktrees",
       "category": "developer-tools"
     },

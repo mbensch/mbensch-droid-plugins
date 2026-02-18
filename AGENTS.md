@@ -1,6 +1,6 @@
 # Droid Marketplace - Agent Guide
 
-This guide explains how to use Droid to work with the `mbensch-droid-plugins` marketplace repository.
+This guide explains how to use Droid to work with the `mb-ai-tools` marketplace repository.
 
 ## Working with This Repository
 
@@ -32,19 +32,23 @@ Droid can help you with:
 
 ## Repository Structure
 
+This repo serves as a marketplace for both Factory (Droid) and Claude Code. The `.factory-plugin/` directories are for Droid, and `.claude-plugin/` directories are for Claude Code. Plugins using only `skills/` and `commands/` work on both platforms. Hook-based plugins (`droid-receipts`, `auto-worktrees`) are Droid-only.
+
 ```
-mbensch-droid-plugins/
+mb-ai-tools/
 ├── .factory-plugin/
-│   └── marketplace.json    # Marketplace manifest
+│   └── marketplace.json    # Factory marketplace manifest (all plugins)
+├── .claude-plugin/
+│   └── marketplace.json    # Claude Code marketplace manifest (compatible plugins only)
 ├── plugins/
-│   ├── droid-receipts/     # Session receipt generator
+│   ├── droid-receipts/     # Session receipt generator (Droid-only)
 │   │   ├── .factory-plugin/
 │   │   │   └── plugin.json
 │   │   ├── hooks/
 │   │   │   └── generate-receipt.py
 │   │   ├── hooks.json
 │   │   └── README.md
-│   ├── auto-worktrees/     # Automatic worktree management (hooks)
+│   ├── auto-worktrees/     # Automatic worktree management (Droid-only)
 │   │   ├── .factory-plugin/
 │   │   │   └── plugin.json
 │   │   ├── hooks/
@@ -53,23 +57,37 @@ mbensch-droid-plugins/
 │   ├── manual-worktrees/   # On-demand worktree commands
 │   │   ├── .factory-plugin/
 │   │   │   └── plugin.json
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
 │   │   ├── commands/
 │   │   │   └── worktree.md
 │   │   └── README.md
 │   ├── worktrees-skill/     # Worktree management skill
 │   │   ├── .factory-plugin/
 │   │   │   └── plugin.json
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
 │   │   ├── skills/
 │   │   │   └── using-worktrees/
 │   │   │       └── SKILL.md
 │   │   └── README.md
-│   └── jira-tools/          # Jira ticket management skills
+│   ├── jira-tools/          # Jira ticket management skills
+│   │   ├── .factory-plugin/
+│   │   │   └── plugin.json
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── skills/
+│   │   │   ├── manage-jira/
+│   │   │   ├── create-jira-story/
+│   │   │   └── create-jira-bug/
+│   │   └── README.md
+│   └── pr-tools/            # Safe PR workflow
 │       ├── .factory-plugin/
 │       │   └── plugin.json
+│       ├── .claude-plugin/
+│       │   └── plugin.json
 │       ├── skills/
-│       │   ├── manage-jira/
-│       │   ├── create-jira-story/
-│       │   └── create-jira-bug/
+│       │   └── safe-pr-workflow/
 │       └── README.md
 └── README.md               # Marketplace docs
 ```
@@ -118,8 +136,10 @@ Use Droid to:
 
 **IMPORTANT: Always keep README.md updated.** When adding, removing, or renaming plugins, you MUST update:
 - The plugin's own `plugins/{name}/README.md`
-- The root `README.md` Available Plugins section
+- The root `README.md` Available Plugins section and Platform Compatibility table
 - The `.factory-plugin/marketplace.json` entries
+- The `.claude-plugin/marketplace.json` entries (if the plugin is Claude Code compatible)
+- Add `.claude-plugin/plugin.json` to the plugin directory (if Claude Code compatible)
 
 ## Testing Plugins
 
@@ -130,7 +150,7 @@ Locally test plugin before pushing:
 droid plugin marketplace add /path/to/this/repo
 
 # Install plugin
-droid plugin install your-plugin@mbensch-droid-plugins
+droid plugin install your-plugin@mb-ai-tools
 
 # Test functionality
 # Verify hooks fire

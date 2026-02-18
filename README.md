@@ -4,34 +4,42 @@ My personal Factory plugin marketplace - a collection of plugins and tools I've 
 
 ## Overview
 
-This is my personal marketplace for distributing Droid plugins I've created. Built as a [Factory Enterprise Plugin Registry](https://docs.factory.ai/enterprise/enterprise-plugin-registry), it follows the Git-based marketplace format that Factory uses for plugin distribution.
+This is my personal marketplace for distributing plugins I've created. It works as a marketplace for both **Factory (Droid)** and **Claude Code** -- the same repository, two plugin systems.
 
 ## Installation
 
-Add this marketplace to Factory:
+### Factory (Droid)
 
 ```bash
-droid plugin marketplace add https://github.com/mbensch/mbensch-droid-plugins
+droid plugin marketplace add https://github.com/mbensch/mb-ai-tools
 ```
-
-Install plugins:
 
 ```bash
 # Core plugins
-droid plugin install droid-receipts@mbensch-droid-plugins
+droid plugin install droid-receipts@mb-ai-tools
 
 # Choose ONE worktree approach (see Author's Notes below)
-droid plugin install manual-worktrees@mbensch-droid-plugins  # or auto-worktrees
+droid plugin install manual-worktrees@mb-ai-tools  # or auto-worktrees
 
 # Optional: enhances worktree handling
-droid plugin install worktrees-skill@mbensch-droid-plugins
+droid plugin install worktrees-skill@mb-ai-tools
 ```
 
-Or browse available plugins via the UI:
+Or browse available plugins via the UI: `/plugins`
+
+### Claude Code
 
 ```bash
-/plugins
+/plugin marketplace add https://github.com/mbensch/mb-ai-tools
 ```
+
+```bash
+/plugin install manual-worktrees@mb-ai-tools
+/plugin install worktrees-skill@mb-ai-tools
+/plugin install jira-tools@mb-ai-tools
+```
+
+Or browse available plugins via: `/plugin marketplace list`
 
 ## Available Plugins
 
@@ -89,6 +97,26 @@ Jira skills for managing tickets, creating stories, and filing bugs via Atlassia
 
 **Requires:** [Atlassian MCP integration](https://app.factory.ai/settings/integrations) configured in Factory settings.
 
+### pr-tools
+
+Safe git push and PR workflow skill that prevents pushing to merged or closed PRs.
+
+**Skills:**
+- `safe-pr-workflow` - Checks branch state before git push and PR creation to avoid silently pushing to dead PRs
+
+## Platform Compatibility
+
+| Plugin | Factory (Droid) | Claude Code |
+|--------|:-:|:-:|
+| droid-receipts | Yes | No (Droid-only hooks) |
+| auto-worktrees | Yes | No (Droid-only hooks) |
+| manual-worktrees | Yes | Yes |
+| worktrees-skill | Yes | Yes |
+| jira-tools | Yes | Yes |
+| pr-tools | Yes | Yes |
+
+Plugins that rely on Droid-specific lifecycle hooks (`SessionStart`, `SessionEnd`) and environment variables are not available on Claude Code. Plugins using skills and commands work identically on both platforms.
+
 ## Author's Notes
 
 ### Choosing a Worktree Plugin
@@ -103,12 +131,12 @@ Jira skills for managing tickets, creating stories, and filing bugs via Atlassia
 
 ```bash
 # Option A: Automatic worktrees + skill
-droid plugin install auto-worktrees@mbensch-droid-plugins
-droid plugin install worktrees-skill@mbensch-droid-plugins
+droid plugin install auto-worktrees@mb-ai-tools
+droid plugin install worktrees-skill@mb-ai-tools
 
 # Option B: Manual worktrees + skill (recommended if unsure)
-droid plugin install manual-worktrees@mbensch-droid-plugins
-droid plugin install worktrees-skill@mbensch-droid-plugins
+droid plugin install manual-worktrees@mb-ai-tools
+droid plugin install worktrees-skill@mb-ai-tools
 ```
 
 The `worktrees-skill` plugin complements either choice by giving Droid a deeper understanding of worktree best practices for complex implementation tasks.
@@ -119,9 +147,11 @@ To add a new plugin to this marketplace:
 
 1. Create a new directory under `plugins/your-plugin-name/`
 2. Add a `.factory-plugin/plugin.json` manifest
-3. Add your plugin files (hooks.json, skills/, hooks/, etc.)
-4. Update `.factory-plugin/marketplace.json` to register the plugin
-5. Commit and push
+3. If the plugin is compatible with Claude Code, also add `.claude-plugin/plugin.json`
+4. Add your plugin files (hooks.json, skills/, hooks/, etc.)
+5. Update `.factory-plugin/marketplace.json` to register the plugin
+6. If Claude Code compatible, also update `.claude-plugin/marketplace.json`
+7. Commit and push
 
 **Example structure:**
 ```
@@ -129,24 +159,14 @@ plugins/
 └── your-plugin/
     ├── .factory-plugin/
     │   └── plugin.json
-    ├── hooks.json
-    ├── hooks/
+    ├── .claude-plugin/        # Add for Claude Code compatibility
+    │   └── plugin.json
+    ├── skills/
+    ├── commands/
     └── README.md
 ```
 
-**Update marketplace.json:**
-```json
-{
-  "plugins": [
-    {
-      "name": "your-plugin",
-      "description": "Plugin description",
-      "source": "./plugins/your-plugin",
-      "category": "productivity"
-    }
-  ]
-}
-```
+The `skills/` and `commands/` directories are shared between both platforms. Hooks and droids/agents use different formats per platform.
 
 ## Contributing
 
