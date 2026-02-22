@@ -15,6 +15,7 @@ droid plugin marketplace add https://github.com/mbensch/mb-ai-tools
 droid plugin install pr-tools@mb-ai-tools
 droid plugin install jira-tools@mb-ai-tools
 droid plugin install manual-worktrees@mb-ai-tools
+droid plugin install steering@mb-ai-tools
 ```
 
 ### Claude Code
@@ -24,6 +25,7 @@ droid plugin install manual-worktrees@mb-ai-tools
 /plugin install pr-tools@mb-ai-tools
 /plugin install jira-tools@mb-ai-tools
 /plugin install manual-worktrees@mb-ai-tools
+/plugin install steering@mb-ai-tools
 ```
 
 Browse all available plugins: `/plugins` (Droid) or `/plugin marketplace list` (Claude Code).
@@ -92,6 +94,17 @@ Skills for safe and consistent pull request workflows.
 - `safe-pr-workflow` - Checks branch state before git push and PR creation to avoid silently pushing to dead PRs
 - `create-pr` - Creates PRs with consistent formatting, Jira-aware branch naming, and repo template support
 
+### steering
+
+Generate and maintain a `STEERING.md` file that defines non-negotiable rules for AI agents working in your codebase. Inspired by Kiro's steering file concept.
+
+**Commands:**
+- `/init-steering` - Deep-scans the codebase (manifests, linter configs, docs, CI workflows) and generates a tailored `STEERING.md`. Also updates `AGENTS.md` and installs a project-local `tech-stack` skill.
+- `/update-steering` - Guided command to add or modify rules in `STEERING.md` (new "do"/"don't" rules, tech stack changes, conventions, architecture constraints)
+
+**Skills:**
+- `tech-stack` - Auto-loaded project skill (installed by `/init-steering`) that enforces reading `STEERING.md` before every technology or architecture decision
+
 ## Platform Compatibility
 
 | Plugin | Factory (Droid) | Claude Code |
@@ -102,6 +115,7 @@ Skills for safe and consistent pull request workflows.
 | worktrees-skill | Yes | Yes |
 | jira-tools | Yes | Yes |
 | pr-tools | Yes | Yes |
+| steering | Yes | Yes |
 
 Plugins that rely on Droid-specific lifecycle hooks (`SessionStart`, `SessionEnd`) and environment variables are not available on Claude Code. Plugins using skills and commands work identically on both platforms.
 

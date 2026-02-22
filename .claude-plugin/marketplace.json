@@ -28,6 +28,12 @@
       "description": "Safe git push and PR workflow skill that prevents pushing to merged or closed PRs",
       "source": "./plugins/pr-tools",
       "category": "developer-tools"
+    },
+    {
+      "name": "steering",
+      "description": "Generate and maintain a STEERING.md file with non-negotiable tech stack, coding conventions, and architecture rules for AI agents",
+      "source": "./plugins/steering",
+      "category": "developer-tools"
     }
   ]
 }

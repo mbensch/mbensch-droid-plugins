@@ -1,0 +1,8 @@
+{
+  "name": "steering",
+  "version": "1.0.0",
+  "description": "Initialize and maintain a STEERING.md file that defines non-negotiable tech stack, coding conventions, and architecture rules for AI agents",
+  "author": {
+    "name": "Marcel Bensch"
+  }
+}
