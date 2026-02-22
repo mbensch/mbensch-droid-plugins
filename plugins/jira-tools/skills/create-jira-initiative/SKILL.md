@@ -91,13 +91,9 @@ Use `atlassian___createJiraIssue` via the `manage-jira` skill for API mechanics:
 
 ### 5. Set Team
 
-Every ticket **must** have a team assigned to appear on the board. Ask the user which team should own this initiative, then set it:
+Every ticket **must** have a team assigned to appear on the board. Follow the team assignment instructions from the active project skill (e.g. `cars-project`), which contains the correct custom field ID and team UUID resolution steps for the current org.
 
-```
-atlassian___editJiraIssue(cloudId, issueIdOrKey: "PROJ-456", fields: {"customfield_11100": "<team-uuid>"})
-```
-
-To resolve a team name to its UUID, look at the `customfield_11100` value on an existing ticket that belongs to that team (see `manage-jira` skill for details).
+If no project skill is active, ask the user which team should own this initiative, then set it via `atlassian___editJiraIssue` using the field ID and value format appropriate for the org (see `manage-jira` skill for discovery steps).
 
 ## What This Skill Does NOT Cover
 

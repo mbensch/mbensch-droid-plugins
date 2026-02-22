@@ -83,6 +83,10 @@ Applies human-writing guidelines to all ticket content drafted by `/jira-create`
 
 Originally authored by [Factory-AI/factory-plugins](https://github.com/Factory-AI/factory-plugins/blob/master/plugins/droid-evolved/skills/human-writing/SKILL.md).
 
+### `cars-project` *(internal)*
+
+CARS project-specific configuration for the `carscommerce.atlassian.net` org. Activated automatically by `/jira-create` when the user is authenticated to carscommerce and selects the CARS project. Provides team field ID and UUID resolution instructions so create skills do not hardcode org-specific values.
+
 ## Plugin Structure
 
 ```
@@ -110,7 +114,9 @@ jira-tools/
 │   │   └── SKILL.md
 │   ├── create-jira-bug/
 │   │   └── SKILL.md
-│   └── human-writing/
+│   ├── human-writing/
+│   │   └── SKILL.md
+│   └── cars-project/
 │       └── SKILL.md
 └── README.md
 ```

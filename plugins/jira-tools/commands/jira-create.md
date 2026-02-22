@@ -17,7 +17,16 @@ git rev-parse --show-toplevel 2>/dev/null
 
 Store the result. If it succeeds, the user is in a codebase context -- keep this in mind for Step 4.
 
-## Step 2: Ask What to Create
+## Step 2: Detect Atlassian Org and Project
+
+Call `atlassian___getAccessibleAtlassianResources` to get the list of Atlassian sites the user has access to.
+
+- If a site with URL containing `carscommerce` is found, set the active org to `carscommerce`.
+- Then call `atlassian___getVisibleJiraProjects` to fetch available projects for that site, and use **AskUser** to ask the user which project they want to work in (present the list of project names from the API response).
+- If the user selects the **CARS** project, activate the `cars-project` skill for the rest of this command invocation. This skill provides org-specific team field configuration.
+- If no `carscommerce` site is found, proceed without activating any project-specific skill.
+
+## Step 3: Ask What to Create
 
 Use AskUser to ask the user what type of Jira issue they want to create:
 
@@ -26,19 +35,15 @@ Use AskUser to ask the user what type of Jira issue they want to create:
 - Story
 - Bug
 
-## Step 3: Gather Initial Intent
+## Step 4: Gather Initial Intent
 
 Ask the user to describe what they want to create. Prompt them for a short description of the goal, problem, or feature. Use plain text -- do not use AskUser for this; just ask directly and wait for their response.
 
-## Step 4: Codebase Analysis (Conditional)
+## Step 5: Codebase Analysis
 
-If the user is in a codebase context AND the request sounds technical (involves code, systems, services, endpoints, or infrastructure):
+If the user is in a codebase context (detected in Step 1), always ask the user via AskUser whether they want to analyze the codebase to produce a more accurate and detailed ticket. If the user accepts, investigate relevant source files, recent commits, config, and related code before drafting. Pass findings to the create skill as context.
 
-- Offer to analyze the codebase to produce a more accurate and detailed ticket.
-- If the user accepts (or seems to expect it), investigate relevant source files, recent commits, config, and related code before drafting. Use what you find to write an accurate Background section and relevant technical details.
-- If the request is clearly non-technical (e.g. a product initiative, a process story), skip this step.
-
-## Step 5: Invoke the Matching Skill
+## Step 6: Invoke the Matching Skill
 
 Based on the issue type chosen in Step 2, invoke the corresponding skill:
 
@@ -49,7 +54,7 @@ Based on the issue type chosen in Step 2, invoke the corresponding skill:
 | Story      | `create-jira-story` |
 | Bug        | `create-jira-bug` |
 
-Pass the user's description and any codebase findings to the skill as context. The skill will handle clarifying questions, description drafting, ticket creation, and team assignment.
+Pass the user's description, codebase findings (if any), and the active project skill context to the skill. The skill will handle clarifying questions, description drafting, ticket creation, and team assignment.
 
 ## Notes
 

@@ -99,19 +99,14 @@ Use `atlassian___createJiraIssue` via the `manage-jira` skill for API mechanics:
 
 ### 6. Set Team
 
-Every ticket **must** have a team assigned to appear on the board. Determine the team immediately after creating the ticket:
+Every ticket **must** have a team assigned to appear on the board. Follow the team assignment instructions from the active project skill (e.g. `cars-project`), which contains the correct custom field ID and team UUID resolution steps for the current org.
 
-1. **If a parent ticket was provided**, fetch it with `atlassian___getJiraIssue` and read the team field (`customfield_11100`).
-   - If the parent has a team, use **AskUser** to offer:
-     - *"Use parent's team: \<Team Name\>"*
-     - *"Specify a different team"*
-   - If the parent has no team, ask the user: *"Which team should own this story?"*
-2. **If no parent was provided**, ask the user: *"Which team should own this story?"*
-3. **Set the team** on the newly created ticket via `atlassian___editJiraIssue`:
-   ```
-   atlassian___editJiraIssue(cloudId, issueIdOrKey: "PROJ-456", fields: {"customfield_11100": "<team-uuid>"})
-   ```
-   To resolve a team name to its UUID, look at the `customfield_11100` value on an existing ticket that belongs to that team (see `manage-jira` skill for details).
+If no project skill is active:
+1. **If a parent ticket was provided**, fetch it with `atlassian___getJiraIssue` and check if it has a team field set.
+   - If yes, use **AskUser** to offer using the parent's team or specifying a different one.
+   - If no, ask the user which team should own this story.
+2. **If no parent was provided**, ask the user which team should own this story.
+3. Set the team via `atlassian___editJiraIssue` using the field ID and value format appropriate for the org (see `manage-jira` skill for discovery steps).
 
 ## What This Skill Does NOT Cover
 
