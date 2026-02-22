@@ -81,6 +81,8 @@ Structured Jira Bug creation. Invoked by `/jira-create`.
 
 Applies human-writing guidelines to all ticket content drafted by `/jira-create`. Removes AI-sounding patterns (inflated significance, promotional language, em dash overuse, rule of three, AI vocabulary words) and ensures descriptions read like a person wrote them. Based on Wikipedia's "Signs of AI writing" guide.
 
+Originally authored by [Factory-AI/factory-plugins](https://github.com/Factory-AI/factory-plugins/blob/master/plugins/droid-evolved/skills/human-writing/SKILL.md).
+
 ## Plugin Structure
 
 ```
